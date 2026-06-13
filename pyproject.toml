@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "ml-for-science"
 version = "0.1.0"
-description = "PhD-level ML for science: proteins, climate PINNs, genomics batch correction, materials active learning"
+description = "Research benchmarks for scientific ML: proteins, climate PINNs, genomics, materials discovery"
 readme = "README.md"
 requires-python = ">=3.10"
 dependencies = [

@@ -1,67 +1,193 @@
 # ML for Science
 
-PhD-level scientific ML suite covering **protein property prediction** (EGNN), **climate downscaling** (PINNs), **single-cell batch correction** (VAE + OT), and **materials active learning** — all evaluated on synthetic data with known ground truth.
+A research benchmark suite for **scientific machine learning** across four domains where domain structure critically shapes model design: protein property prediction (equivariant GNNs), climate downscaling (physics-informed neural networks), single-cell genomics batch correction (optimal transport), and materials discovery (Gaussian process active learning). All experiments use synthetic DGPs with known physical invariants and ground-truth oracles.
 
-## Modules
+The central research question: *how do we build ML models that respect scientific symmetries, physical laws, and experimental constraints while achieving predictive accuracy?*
 
-| Module | Description | Key metrics |
-|--------|-------------|-------------|
-| **Protein** | SE(3)-equivariant GNN vs MLP on folding stability from 3D chains | RMSE, Spearman, rotation consistency |
-| **Climate** | Residual PINN refinement over bicubic on spectral temperature fields | RMSE, spectral bias, physics residual |
-| **Genomics** | VAE reconstruction + linear / Sinkhorn batch correction | Batch mixing, biological preservation |
-| **Materials** | GP-based active learning over expensive property oracle | Regret, normalized score, top-k hit rate |
+---
 
-## Assumptions
+## Research scope
 
-- **Protein:** Stability is a function of rotation/translation-invariant geometry (radius of gyration, contact density)
-- **Climate:** Fine field is a smooth Fourier sum; coarse grid is block-averaged; PINN learns a physics-aware residual correction over bicubic upsampling
-- **Genomics:** Expression = cell-type profile + batch shift + noise; correction should mix batches without destroying type structure
-- **Materials:** Property landscape is smooth in a low-dimensional active subspace; GP surrogate guides acquisition
+| Module | Domain | Methods | Primary metrics |
+|--------|--------|---------|-----------------|
+| **Protein** | 3D structure → folding stability | EGNN, MLP baseline | RMSE, Spearman, rotation consistency |
+| **Climate** | Coarse → fine temperature fields | Bicubic + residual PINN | RMSE, spectral bias, physics residual |
+| **Genomics** | scRNA-seq batch correction | VAE + linear / Sinkhorn OT | Batch mixing, biological preservation |
+| **Materials** | Property optimization | GP active learning (random, UCB, EI) | Regret, normalized score, top-k hit rate |
 
-## Setup
+---
+
+## Module 1: Protein property prediction
+
+### Problem formulation
+
+Protein function depends on **3D structure**, and predictions must be invariant to rotation and translation (SE(3) symmetry). Standard MLPs on flattened coordinates violate this symmetry, requiring **equivariant architectures** (Satorras et al., 2021; Thomas et al., 2018).
+
+### Implemented methods
+
+| Method | Approach | Reference |
+|--------|----------|-----------|
+| **EGNN** | E(n)-equivariant graph neural network on residue graphs | Satorras et al. (2021) |
+| **MLP baseline** | Non-equivariant baseline on flattened coordinates | Comparison |
+
+EGNN updates node features and coordinates via message passing that commutes with Euclidean transformations — predictions are identical regardless of how the protein is oriented in space (Satorras et al., 2021).
+
+### Synthetic DGP (`data/protein_dgp.py`)
+
+- Random-walk 3D protein chains
+- Stability = f(radius of gyration, contact density) — **SE(3)-invariant** by construction
+- Ground-truth stability available for every conformation
+
+### Evaluation metrics
+
+- **RMSE / Spearman:** Prediction accuracy and ranking quality
+- **Rotation consistency:** |f(R·x) − f(x)| — should be ≈ 0 for equivariant models
+
+---
+
+## Module 2: Climate downscaling
+
+### Problem formulation
+
+**Climate downscaling** maps coarse-resolution temperature fields to fine-resolution grids. Pure interpolation (bicubic) ignores physical structure; **physics-informed neural networks (PINNs)** (Raissi et al., 2019) embed PDE constraints into the loss function.
+
+### Implemented method
+
+1. **Bicubic upsampling** of coarse field (baseline)
+2. **Residual PINN** (`models/pinn.py`) learns a physics-aware correction:
+   - Data loss: match fine-resolution observations
+   - Physics loss: penalize PDE residual (smoothness / Laplacian constraint)
+
+### Synthetic DGP (`data/climate_dgp.py`)
+
+- Fine field: smooth 2D Fourier sum (physically plausible temperature surface)
+- Coarse field: block-averaged downsampling
+- Known fine-resolution ground truth for RMSE evaluation
+
+### Evaluation metrics
+
+- **RMSE:** Reconstruction error vs. fine-resolution truth
+- **Spectral bias:** Frequency-domain error (PINNs are known to prefer low frequencies; Rahaman et al., 2019)
+- **Physics residual:** Magnitude of PDE constraint violation
+
+---
+
+## Module 3: Single-cell genomics batch correction
+
+### Problem formulation
+
+Single-cell RNA sequencing (scRNA-seq) experiments exhibit **batch effects** — technical variation between experimental runs that confounds biological signal (Haghverdi et al., 2018). Correction must **mix batches** while **preserving cell-type structure**.
+
+### Implemented methods
+
+| Method | Approach | Reference |
+|--------|----------|-----------|
+| **VAE** | Learn low-dimensional latent representation of expression profiles | Kingma & Welling (2014) |
+| **Linear correction** | Remove batch-specific linear shift in latent space | ComBat-style (Johnson et al., 2007) |
+| **Sinkhorn OT** | Optimal transport alignment between batch distributions | Kassraee et al. (2022) |
+
+Optimal transport batch correction (Kassraee et al., 2022) finds a coupling between batch distributions that minimizes transport cost while aligning shared cell types.
+
+### Synthetic DGP (`data/genomics_dgp.py`)
+
+- Expression = cell-type profile + batch shift + noise
+- Known cell-type labels and batch assignments
+- Ground-truth uncorrected and corrected profiles available
+
+### Evaluation metrics
+
+- **Batch mixing:** k-NN batch entropy in latent space (higher = better mixing)
+- **Biological preservation:** Cell-type silhouette score (higher = structure preserved)
+
+---
+
+## Module 4: Materials active learning
+
+### Problem formulation
+
+Materials discovery requires evaluating expensive property oracles (DFT calculations, synthesis + assay). **Active learning** with Gaussian process surrogates (Jones et al., 1998) selects the most informative compositions to evaluate next.
+
+### Implemented acquisition strategies
+
+| Strategy | Criterion | Reference |
+|----------|-----------|-----------|
+| **Random** | Uniform sampling | Baseline |
+| **Uncertainty** | Maximize posterior variance | GP uncertainty sampling |
+| **Expected improvement** | Maximize E[max(f* − f(x), 0)] | Jones et al. (1998) |
+
+### Synthetic DGP (`data/materials_dgp.py`)
+
+- Property landscape smooth in a **low-dimensional active subspace**
+- Known global optimum for regret computation
+- Tunable evaluation budget
+
+### Evaluation metrics
+
+- **Regret:** f(x*) − f(x̂_best) after budget exhausted
+- **Normalized score:** Improvement over random search
+- **Top-k hit rate:** Fraction of true top-k compositions found
+
+---
+
+## Benchmark protocol
 
 ```bash
-cd 10-ml-for-science
 pip install -e ".[dev]"
-```
 
-## Run benchmarks
-
-```bash
-# All modules
 python scripts/run_benchmark.py --config configs/protein_benchmark.yaml --module all
-
-# Individual modules
 python scripts/run_benchmark.py --config configs/protein_benchmark.yaml --module protein
 python scripts/run_benchmark.py --config configs/climate_benchmark.yaml --module climate
 python scripts/run_benchmark.py --config configs/genomics_benchmark.yaml --module genomics
 python scripts/run_benchmark.py --config configs/materials_benchmark.yaml --module materials
-```
 
-Results are written to `results/{timestamp}/metrics.json` and `summary.md`.
-
-## Run tests
-
-```bash
 pytest
 ```
+
+---
 
 ## Project layout
 
 ```
 src/ml_sci/
-├── data/              # Protein, climate, genomics, materials DGPs with ground-truth accessors
+├── data/              # Protein, climate, genomics, materials DGPs
 ├── models/            # EGNN, PINN, VAE building blocks
 ├── protein/           # Equivariant property prediction
-├── climate/           # PINN and bicubic downscaling
+├── climate/           # PINN downscaling over bicubic baseline
 ├── genomics/          # VAE + batch correction (linear, Sinkhorn OT)
-├── materials/         # Active learning (random, uncertainty, EI)
+├── materials/         # GP active learning strategies
 └── evaluation/        # Benchmark runner and reporting
 ```
 
+---
+
+## Implementation notes
+
+- EGNN is a **simplified** E(n)-equivariant GNN (Satorras et al., 2021); full implementation includes edge features and higher-order interactions
+- PINN physics loss uses **smoothness regularization**, not full Navier-Stokes equations
+- Batch correction operates on **VAE latents**, not raw expression space (following scVI; Lopez et al., 2018)
+- GP surrogate uses **sklearn GaussianProcessRegressor** with RBF kernel
+
+---
+
+## References
+
+- Haghverdi, L., Lun, A. T. L., Morgan, M. D., & Marioni, J. C. (2018). Batch effects in single-cell RNA-sequencing data are corrected by matching mutual nearest neighbors. *Nature Biotechnology*.
+- Johnson, W. E., Li, C., & Rabinovic, A. (2007). Adjusting batch effects in microarray expression data using empirical Bayes methods. *Biostatistics*.
+- Jones, D. R., Schonlau, M., & Welch, W. J. (1998). Efficient global optimization of expensive black-box functions. *Journal of Global Optimization*.
+- Kassraee, P., et al. (2022). Single-cell matching with optimal transport. *bioRxiv*.
+- Kingma, D. P., & Welling, M. (2014). Auto-encoding variational Bayes. *ICLR*.
+- Lopez, R., et al. (2018). Deep generative modeling for single-cell transcriptomics. *Nature Methods*.
+- Rahaman, N., et al. (2019). On the spectral bias of neural networks. *ICML*.
+- Raissi, M., Perdikaris, P., & Karniadakis, G. E. (2019). Physics-informed neural networks: A deep learning framework for solving forward and inverse problems involving nonlinear partial differential equations. *Journal of Computational Physics*.
+- Satorras, V. G., Hoogeboom, E., & Welling, M. (2021). E(n) equivariant graph neural networks. *ICML*.
+- Shahriari, B., et al. (2016). Taking the human out of the loop: A review of Bayesian optimization. *Proceedings of the IEEE*.
+- Thomas, N., et al. (2018). Tensor field networks: Rotation- and translation-equivariant neural networks for 3D point clouds. *arXiv:1802.08219*.
+
+---
+
 ## Future work
 
-- Real protein structures (PDB) with ESM embeddings and AlphaFold coordinates
-- ERA5 → regional climate downscaling with full Navier-Stokes physics losses
-- scVI / scANVI integration on real 10x datasets
-- Bayesian optimization with multi-fidelity materials simulators (DFT, MD)
+- Real protein structures (PDB) with ESM embeddings (Lin et al., 2023)
+- ERA5 → regional downscaling with full PDE constraints
+- scVI / scANVI integration on 10x Genomics datasets
+- Multi-fidelity Bayesian optimization with DFT/MD simulators
