@@ -1,0 +1,2 @@
+methods: [random, uncertainty, expected_improvement]
+eval_budgets: [30, 60]

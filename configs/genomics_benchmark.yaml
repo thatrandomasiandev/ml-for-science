@@ -1,0 +1,3 @@
+batch_sizes: [2, 4]
+correction_methods: [none, linear, sinkhorn]
+epochs: 80

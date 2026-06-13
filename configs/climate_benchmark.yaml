@@ -1,0 +1,3 @@
+downscale_factors: [4, 8]
+noise_levels: [0.05, 0.15]
+epochs: 100

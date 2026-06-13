@@ -1,0 +1,4 @@
+models: [egnn, mlp]
+n_proteins_list: [200, 400]
+n_residues: 32
+epochs: 60
