@@ -171,17 +171,17 @@ src/ml_sci/
 
 ## References
 
-- Haghverdi, L., Lun, A. T. L., Morgan, M. D., & Marioni, J. C. (2018). Batch effects in single-cell RNA-sequencing data are corrected by matching mutual nearest neighbors. *Nature Biotechnology*.
-- Johnson, W. E., Li, C., & Rabinovic, A. (2007). Adjusting batch effects in microarray expression data using empirical Bayes methods. *Biostatistics*.
-- Jones, D. R., Schonlau, M., & Welch, W. J. (1998). Efficient global optimization of expensive black-box functions. *Journal of Global Optimization*.
-- Kassraee, P., et al. (2022). Single-cell matching with optimal transport. *bioRxiv*.
-- Kingma, D. P., & Welling, M. (2014). Auto-encoding variational Bayes. *ICLR*.
-- Lopez, R., et al. (2018). Deep generative modeling for single-cell transcriptomics. *Nature Methods*.
-- Rahaman, N., et al. (2019). On the spectral bias of neural networks. *ICML*.
-- Raissi, M., Perdikaris, P., & Karniadakis, G. E. (2019). Physics-informed neural networks: A deep learning framework for solving forward and inverse problems involving nonlinear partial differential equations. *Journal of Computational Physics*.
-- Satorras, V. G., Hoogeboom, E., & Welling, M. (2021). E(n) equivariant graph neural networks. *ICML*.
-- Shahriari, B., et al. (2016). Taking the human out of the loop: A review of Bayesian optimization. *Proceedings of the IEEE*.
-- Thomas, N., et al. (2018). Tensor field networks: Rotation- and translation-equivariant neural networks for 3D point clouds. *arXiv:1802.08219*.
+- Haghverdi, L., Lun, A. T. L., Morgan, M. D., & Marioni, J. C. (2018). Batch effects in single-cell RNA-sequencing data are corrected by matching mutual nearest neighbors. *Nature Biotechnology*, 36(5), 421–427. [DOI](https://doi.org/10.1038/nbt.4091)
+- Johnson, W. E., Li, C., & Rabinovic, A. (2007). Adjusting batch effects in microarray expression data using empirical Bayes methods. *Biostatistics*, 8(1), 118–127. [DOI](https://doi.org/10.1093/biostatistics/kxj037)
+- Jones, D. R., Schonlau, M., & Welch, W. J. (1998). Efficient global optimization of expensive black-box functions. *Journal of Global Optimization*, 13(4), 455–492. [DOI](https://doi.org/10.1023/A:1008306431147)
+- Kassraee, P., et al. (2022). Single-cell matching with optimal transport. [bioRxiv](https://doi.org/10.1101/2022.04.06.487174)
+- Kingma, D. P., & Welling, M. (2014). Auto-encoding variational Bayes. *ICLR*. [arXiv](https://arxiv.org/abs/1312.6114)
+- Lopez, R., et al. (2018). Deep generative modeling for single-cell transcriptomics. *Nature Methods*, 15(12), 1053–1058. [DOI](https://doi.org/10.1038/s41592-018-0229-2)
+- Rahaman, N., et al. (2019). On the spectral bias of neural networks. *ICML*. [arXiv](https://arxiv.org/abs/1806.08734)
+- Raissi, M., Perdikaris, P., & Karniadakis, G. E. (2019). Physics-informed neural networks: A deep learning framework for solving forward and inverse problems involving nonlinear partial differential equations. *Journal of Computational Physics*, 378, 686–707. [DOI](https://doi.org/10.1016/j.jcp.2018.10.045)
+- Satorras, V. G., Hoogeboom, E., & Welling, M. (2021). E(n) equivariant graph neural networks. *ICML*. [arXiv](https://arxiv.org/abs/2102.09844)
+- Shahriari, B., et al. (2016). Taking the human out of the loop: A review of Bayesian optimization. *Proceedings of the IEEE*, 104(1), 148–175. [DOI](https://doi.org/10.1109/JPROC.2015.2494218)
+- Thomas, N., et al. (2018). Tensor field networks: Rotation- and translation-equivariant neural networks for 3D point clouds. [arXiv](https://arxiv.org/abs/1802.08219)
 
 ---
 
